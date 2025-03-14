@@ -1,9 +1,30 @@
 # Extra ROI_transcode packages
-1. upgrade pillow from 9.3.0
+
+## Config Conda & pip
+  - conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/cloud/pytorch/
+  - conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/pkgs/main/
+  - conda config --add channels https://mirrors.bfsu.edu.cn/anaconda/pkgs/free/
+  - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/linux-64/
+  - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+  - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+  - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+
+  - conda create -n ENV_AME python=311
+  - conda activate ENV_AME
+  - pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+## Install packages
+  - conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=11.1 -c pytorch -c conda-forge
+  - pip install numpy==1.24 numba==0.54.1 scikit-image==0.19.0 
+  - pip install onnx==1.12.0 onnxruntime-gpu==1.11.0
+  - python -m pip install tb-nightly -i https://mirrors.aliyun.com/pypi/simple
+  - pip install addict future lmdb opencv-python Pillow pyyaml request scipy tqdm yapf thop timm einops av
+  - pip install malplotlib
+
+## Extra config
 2. install matplotlib
 3. install pyclipper
 4. install shapely
-5. revert numpy to <1.22.3>
 
 
 # Linux environment setup
