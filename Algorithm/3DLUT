@@ -1,2 +1,2 @@
 # FFMPEG 3D LUT
-aaaaaa
+[r',g',b'] -> [r'',g'',b'']

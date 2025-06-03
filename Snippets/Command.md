@@ -22,6 +22,10 @@
 ./ffmpeg -i input.mp4 -vf "[INPUT]zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p,fps=25[OUTPUT]" -f rawvideo /home/ops/shuchao/seq/output_ori.yuv
 ```
 
+```bash
+./ffmpeg -i "a.mov" -vf "[INPUT]zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p,fps=25[OUTPUT]" -r 25 -c:v libx264 -profile:v high -x264opts force-cfr:fps=25:keyint=125:min-keyint=125:scenecut=0:colorprim=bt709:transfer=bt709:colormatrix=bt709:ref=1:b-adapt=0:qp=15:deblock=0,0:psy-rd=1.0,0  -preset veryfast -color_range tv -colorspace bt709 -color_primaries bt709 -pix_fmt yuv420p -flags +loop+qpel -acodec libfdk_aac -strict -2 -ac 2 -ar 44100 -ab 384k -cutoff 20000 -psnr -y "b.ts"
+```
+
 # run Docker container
 ```bash
 docker run --shm-size 256G -t -i -e LANG=C.UTF-8 -v /home:/home -v /data:/data --name="ffmpeg_test" ubuntu18.04:ffmpeg_zhousq /bin/bash
@@ -36,5 +40,21 @@ sudo docker exec -it 8304214ae6f6 /bin/bash
 ```bash
 sudo mkdir -p /data/y
 mount -t cifs -o username=---,password=--- //10.1.200.13/m3u8 /data/y
+```
+# Valgrind
+
+## memory check
+```bash
+valgrind --leak-check=full --show-reachable=yes --track-origins=yes --log-file=valgrind.log cmd
+```
+
+## callgrind
+```bash
+valgrind --tool=callgrind --callgrind-out-file=callgrind.out 
+```
+
+# MG compile ffmpeg
+```bash
+./configure --prefix=/home/chaos/ccProj/ffmpeg_build --pkgconfigdir=/home/chaos/ccProj/ffmpeg_build/install/lib/pkgconfig --extra-cflags=-I/home/chaos/ccProj/ffmpeg_build/install/include --extra-ldflags="-L/home/chaos/ccProj/ffmpeg_build/install/lib -Wl,-rpath,/home/chaos/ccProj/ffmpeg_build/install/lib " --extra-libs='-lpthread -lm' --enable-shared --disable-static --enable-gpl --enable-libx265
 ```
 
