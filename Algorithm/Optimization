@@ -1,0 +1,14 @@
+1. 1D array instead of 2D array
+2. compute integer instead of float
+3. add/shift instead of multiply/divide
+4. look-up table
+5. inline high-frequency code
+6. code without data dependencies to make full use of ALUs
+7. keep high Cache Hit Rate
+    1.1 access memory by order(array rather than linked list or tree)
+    1.2 Reduce data jumps and indirect pointer access(linked list, sparse matrix)
+    1.3 use Cache alignment
+    1.4 use prefetching -- __builtin_prefetch
+8. use SIMD instructions(SSE, AVX, NEON) even assembly code
+9. use multi-threading or multi-processing
+10. use GPU(graphics processing unit)   

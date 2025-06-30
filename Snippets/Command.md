@@ -1,3 +1,7 @@
+# Test x265
+## Full
+./x265 --input-res 3840x2160 --fps 50 --keyint 125 --min-keyint 125 --no-scenecut --hdr-opt --colorprim bt2020 --transfer smpte2084 --colormatrix bt2020nc --master-display "G(13250,34500)B(7500,3000)R(34000,16000)WP(15635,16450)L(10000000,500)" --max-cll "1000,500" --no-hrd --input-depth 10 --repeat-headers --ref 3 --b-adapt 2 --bitrate 3456 --bframes 3 --no-open-gop -D 10 --frames 500 --input /media/microsoft1/seq/yuv/mgvivid_3840x2160_f50.yuv --output bs_ori_vivid_off.265 --vivid-opt 1 --vivid-level 2
+
 # Fast compile ffmpeg On IMGO server
 ```bash
 ./configure --prefix=/home/ops/shuchao/libins --pkgconfigdir=/home/ops/shuchao/libins/install/lib/pkgconfig --extra-cflags=-I/home/ops/shuchao/libins/install/include --extra-ldflags="-L/home/ops/shuchao/libins/install/lib -Wl,-rpath,/home/ops/shuchao/libins/install/lib " --extra-libs='-lpthread -lm' --enable-shared --disable-static --enable-gpl --enable-libzimg
