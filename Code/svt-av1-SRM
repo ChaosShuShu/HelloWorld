@@ -1,0 +1,7 @@
+以SequenceControlSet为引
+
+在创建编码句柄时，系统指定scs_pool内scs数量N：10，随后再创建第一个scs实例并存储于scs_instance_array[0]中,每个scs_instance有自己的scs_pool资源。调试时，scs_instance包含scs即enc_ctx，且其scs.enc_ctx指向enc_ctx。记录地址:scs_instance-0x00000210e2433d10,scs_instance.scs-0x00000210e249e770
+
+随后在解析参数时，scs.roi_map指向mg申请的roi_map内存位置，此scs即为scs_instance_array[0]. 记录地址scs-0x00000210e249e770, scs.roi_map-0x00000210e24abaf0
+
+随后在初始化编码句柄时，为每个scs_instance创建1个scs_pool资源，每个scs_pool有N个scs。 记录地址：0index-0x0000028a153c0060,0x0000028a153c0b50,

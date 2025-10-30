@@ -1,0 +1,6 @@
+主要思路：小于r0，图像需要更多资源。使用r0的开方计算量化步长比 $qstep_{ratio}$ 。使用输入qindex及 $qstep_{ratio}$ 计算一个目标DC量化步长，与此量化步长对应的qindex作为此图像的qindex。r0值越大，图像使用的qindex也越大，即量化步长越大，图像质量越低。
+
+## Intra
+
+
+## Inter
