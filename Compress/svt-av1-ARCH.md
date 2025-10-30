@@ -68,3 +68,16 @@ Tips：
 - 当$i{th}$生产者空对象FIFO为空时$i{th}$生产者工序不会激活
 - 当$i{th}$消费者满对象FIFO为空时$i{th}$消费者工序不会激活
 - 橙色箭头表示生产者进程获取空对象的过程，但该过程并未在上方的执行流程快照中描述
+
+## 描述
+
+st_av1_enc_init
+    svt_aom_setup_common_rtcd_internal          (Run time cpu detection)
+    svt_aom_setup_rtcd_internal
+    
+    svt_aom_asm_set_convolve_asm_table          (设置卷积asm函数指针表)
+    svt_aom_init_intra_dc_predictors_c_internal (设置dc预测函数)
+    svt_aom_asm_set_convolve_asm_table          (设置高比特卷积asm函数指针表)
+    svt_aom_init_intra_predictors_internal      (设置帧内预测函数指针表)
+
+    svt_aom_build_blk_geom                      (设置blk geometry)  

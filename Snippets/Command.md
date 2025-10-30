@@ -1,4 +1,16 @@
-# Test x265
+# Test Encoder
+
+## run svt-avt base 
+```shell
+.\SvtAv1EncApp.exe -i D:\seq\yuv\1920x1080_yuv420p.yuv  -w 1920 -h 1080  -q 22 --frames 50 -b roi_test.ivf
+```
+
+### roi encode
+.\SvtAv1EncApp.exe -i /media/microfost1/seq/yuv/1920x1080_yuv420p.yuv -w 1920 -h 1080  -q 22 --frames 50 -b roi_test.ivf --roi-map-file /media/microsoft1/data/output/roi/0.roi
+
+### run svtav1 2pass CBR
+.\SvtAv1EncApp.exe -i /media/microfost1/seq/yuv/1920x1080_yuv420p.yuv -w 1920 -h 1080  -q 22 --frames 50 -b roi_test.ivf --roi-map-file /media/microsoft1/data/output/roi/0.roi
+
 ## Full Vivid
 ```bash
 $x265
