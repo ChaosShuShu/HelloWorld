@@ -9,7 +9,7 @@
 .\SvtAv1EncApp.exe -i /media/microfost1/seq/yuv/1920x1080_yuv420p.yuv -w 1920 -h 1080  -q 22 --frames 50 -b roi_test.ivf --roi-map-file /media/microsoft1/data/output/roi/0.roi
 
 ### run svtav1 2pass CBR
-.\SvtAv1EncApp.exe -i /media/microfost1/seq/yuv/1920x1080_yuv420p.yuv -w 1920 -h 1080  -q 22 --frames 50 -b roi_test.ivf --roi-map-file /media/microsoft1/data/output/roi/0.roi
+.\SvtAv1EncApp -i ${src} -w 1920 -h 1080 --fps 25 --rc 1 --tbr 2041 --passes 2 --preset 5 --stats ${logpath}_pass_stats.stat --lookahead 35 --keyint 125 --tile-rows ${row} --tile-columns ${col} --hierarchical-levels 2 --enable-stat-report 0 --color-primaries bt709 --matrix-coefficients bt709 -b ${dst} > ${log} 2>&1
 
 ## Full Vivid
 ```bash
