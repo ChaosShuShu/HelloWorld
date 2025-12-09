@@ -11,6 +11,12 @@
 ### run svtav1 2pass CBR
 .\SvtAv1EncApp -i ${src} -w 1920 -h 1080 --fps 25 --rc 1 --tbr 2041 --passes 2 --preset 5 --stats ${logpath}_pass_stats.stat --lookahead 35 --keyint 125 --tile-rows ${row} --tile-columns ${col} --hierarchical-levels 2 --enable-stat-report 0 --color-primaries bt709 --matrix-coefficients bt709 -b ${dst} > ${log} 2>&1
 
+### Online 2pass av1
+/data/y/mgtvcloud/bin_update_union/transcoder/tool/ffmpeg_av1  -i ${input}   -vf "[INPUT]scale='min(1920,trunc((1080*dar+0.5)/2)*2)':'min(1080,trunc((1920/dar+0.5)/2)*2)'[FID1];[FID1]setsar='r=1/1',fps=25[OUTPUT]"   -r 25 -c:v libsvtav1 -b:v 1379k -preset 5 -g 125 -keyint_min 125 -svtav1-params "pass=1:lookahead=35" -colorspace bt709 -color_primaries bt709 -pix_fmt yuv420p -flags +loop+qpel -an   -sws_flags fast_bilinear -me_range 24 -coder vlc -me_method dia -partitions +parti4x4+parti8x8+partp8x8 -fastfirstpass 1 -svtav1-passlogfile /data/y/mgtvcloud/log/20250604/362959/v_0_passlog_2025-06-04_09-37-26.stats -flags +psnr -t 430 -y  ${output}
+
+#### Once Edition
+./ffmpeg -i ../../shuchao/seq/av1Source.mp4  -vf "[INPUT]scale='min(1920,trunc((1080*dar+0.5)/2)*2)':'min(1080,trunc((1920/dar+0.5)/2)*2)'[FID1];[FID1]setsar='r=1/1',fps=25[OUTPUT]"   -r 25 -c:v libsvtav1 -b:v 1379k -preset 3 -g 125 -keyint_min 125 -svtav1-params "passes=2:lookahead=35:tile-rows=0:tile-columns=1:hierarchical-levels=2:fast-decode=2:stats="tmp.stats"" -colorspace bt709 -color_primaries bt709 -pix_fmt yuv420p -flags +loop+qpel -an   -sws_flags fast_bilinear -me_range 24 -coder vlc -t 430 -y tmp.mp4
+
 ## Full Vivid
 ```bash
 $x265
@@ -70,7 +76,7 @@ sudo docker exec -it 8304214ae6f6 /bin/bash
 ## mount company cloud-disk
 ```bash
 sudo mkdir -p /data/y
-mount -t cifs -o username=---,password=--- //10.1.200.13/m3u8 /data/y
+mount -t cifs -o username=m3u8,password=5c3op_we14pc0Cu //10.1.200.13/m3u8 /data/y
 ```
 # Valgrind
 

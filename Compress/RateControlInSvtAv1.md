@@ -1,15 +1,31 @@
 # High Level Idea
 
+# 1 pass VBR + Look Ahead
+
+此模式下的延迟有look ahead的滑动窗大小决定.在LAD的滑动窗中对帧进行运动估计, 得到的统计信息用于码率控制. 默认的LAD大小约为2个Mini-GOP, 最大可扩展为120帧.
+
 # 2 pass VBR
 
-2pass模式只能用于对延迟不敏感的场景下.此模式提供最佳的BD-rate以及最佳的码率匹配效果.在pass1, 编码器以与pass2相同的预测结构运行(参考结构),不过是以CRF模式运行.收集到的数据存储在内存或文件中并且用于下一pass的编码.使用相似的预测结构对于码率分配有很重要的帮助.执行码率接近于target码率的pass对于最终达到目标码率有很明显的作用.pass2使用之前pass的数据以实现最佳的性能.
+2pass模式只能用于对延迟不敏感的场景下.此模式提供最佳的BD-rate以及最佳的码率匹配效果.在1st pass, 编码器以与2nd pass相同的预测结构(参考结构)运行,不过是以CRF模式运行.收集到的数据存储在内存或文件中并且用于下一pass的编码.使用相似的预测结构对于码率分配显著的提升.提前执行一次码率接近于target码率的pass,对于最终实现目标码率有很可观的作用.wnd pass使用之前pass的数据以实现最佳的性能.
 
 ## VBR 码控流程
 
 ### First-Pass: 基于pass2预测结构的CRF编码
-可靠的码率控制一般需要准确的统计信息来合理分配码率预算并遵循应用程序施加的限制.即使一个IPP结构的pass能为下一pass提供有用的信息, 它产生的统计信息也不完全精确到能为下一pass体统完美的码率分配决策.而使用与pass2相同预测结构的CRF pass, 能提供足够精确的码率估计,从而为pass2的码率控制决策提供更可靠依据.Pass1是具备Pass2相似预测结构的Pass2快速版本.
+
+可靠的码率控制一般需要准确的统计信息来合理分配码率预算并遵循应用程序施加的限制.即使一个IPP结构的pass能为下一pass提供有用的信息, 它产生的统计信息也不完全精确到能为下一pass体统完美的码率分配决策.而使用与pass2相同预测结构的CRF pass, 能提供足够精确的码率估计, 从而为pass2的码率控制决策提供更可靠的依据.Pass1是Pass2的快速版本, 具备Pass2相似的预测结构.
 
 为了提升统计信息准确度, 使用输入尺寸,帧率和目标码率来估计First-Pass的输入QP从而逼近目标码率.这个步骤总体上能优化oass2码控时的码率逼近效果.First-Pass会存储每帧的如下信息:Picture Number,total number of bits, qindex for the frame, qindex for the sequence. 参见***StatStruct***结构体
+```cpp
+// svt-av1 v3.1.0
+typedef struct StatStruct
+{
+    uint64_t   poc;
+    uint64_t   total_num_bits;
+    uint8_t    qindex;
+    uint8_t    worst_qindex;
+    uint8_t    temporal_layer_index;
+} StatStruct;
+```
 
 为了降低First-Pass的速度开销, 在pass1使用了更快的preset. 举例来说吗如果pass 2使用preset5, 那么pass1使用preset11.为了使pass1更快, 附录B简要描述了一些额外的速度优化项.
 
@@ -29,7 +45,7 @@ pass 2的码率控制包含如下步骤:
 ### GOP级比特分配(get_kf_group_bits())
 - 1pass VBR + LAD with Look Ahead Shorter than GOP Size
 
-    此情形下, lAD不足以覆盖整个GOP, 因此使用统一的码率分配.```kf_group_bits = number of frames in GoP * avg_bits_per_frame```, 其中,avg_bits_per_frame表示每帧的平均比特数.
+    此情形下, LAD不足以覆盖整个GOP, 因此使用统一的码率分配.```kf_group_bits = number of frames in GoP * avg_bits_per_frame```, 其中,avg_bits_per_frame表示每帧的平均比特数.
 
 - 1pass VBR + LAD with Look Ahead Longer than size 
 
@@ -138,7 +154,7 @@ $$
 
 ### Re-encoding
 
-重编码机制用于达成理想的码率使其不至于过分地上溢或下溢. Re-encoding决策在模式决策结束时,且一整帧的常规编码结束之后进行. 由于Re-encoding的决策是发生在上编码之前, 因此帧大小是在模式决策过程中的估计值而非打包阶段(Packetization)得到的实际帧大小. 比较预测码率与实际码率, 若不满足码率限制, 算法将会决定以新的qindex进行Re-encode. 一般来说,尽管SVT-AV1的设计非常灵活, 但Re-encoding仍将非常耗费资源,因此只有模式决策工序会再次执行, 其他的编码管线如运动估计, 熵编码或者环路滤波等没必要再执行一遍. Re-encode决策的机制如下表:
+重编码机制用于达成理想的码率使其不至于过分地上溢或下溢. Re-encoding决策在模式决策结束时,且一整帧的常规编码结束之后进行. 由于Re-encoding的决策是发生在熵编码之前, 因此帧大小是在模式决策过程中的估计值而非打包阶段(Packetization)得到的实际帧大小. 比较预测码率与实际码率, 若不满足码率限制, 算法将会决定以新的qindex进行Re-encode. 一般来说,尽管SVT-AV1的设计非常灵活, 但Re-encoding仍将非常耗费资源,因此只有模式决策工序会再次执行, 其他的编码管线如运动估计, 熵编码或者环路滤波等没必要再执行一遍. Re-encode决策的机制如下表:
 ```mermaid
 flowchart TB
 MDC(MDC输出的图像)
