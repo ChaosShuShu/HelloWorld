@@ -10,9 +10,9 @@
 [target]:   uname -r  # 查看内核版本(辅助)
 
 [target]:   cat /etc/os-release  # 查看操作系统版本
-
-
 ```
+
+```mermaid
 
 graph TD
     A[目标系统] --> B{能运行 uname -m 吗?}
@@ -23,3 +23,16 @@ graph TD
     E -->|/lib/ld-musl-*.so.*| G[musl → 用 *-linux-musl]
     E -->|/system/bin/linker*| H[Android → 用 NDK]
     E -->|其他| I[查发行版或构建系统]
+```
+
+# 2 获取交叉编译工具链
+https://developer.arm.com/downloads/-/gnu-a
+
+解压至/opt
+
+添加/opt/xxx/bin到PATH
+
+# 3 配置交叉编译环境
+GCC: 配置工具
+CMake, meson等: 使用配置文件(项目一般会提供样板文件,根据实际的交叉编译工具链修改即可)
+

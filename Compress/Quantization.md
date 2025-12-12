@@ -1,3 +1,4 @@
+
 # High level Syntax
 
 - Frame Header
@@ -26,9 +27,70 @@ graph LR
 svt_aom_apply_segmentation_based_quantization 中必须能获取当前块的segment_id
 
  -6.1432 - 2.754 * cos(0.898 * j) + 5.072 * sin(0.898 * j) - 2.166 * cos(2 * 0.898 * j) - 0.241 * sin(2 * 0.898 * j)−0.282 * cos(3 * 0.898 * j)−0.778sin(3 * 0.898 * j) +0.265cos(4 * 0.898⋅x) −0.441sin(4 * 0.898⋅x)
+(根据一些测试结果拟合出的曲线)
+
+
+#### 码控流程
+```mermaid
+---
+config:
+  layout: tidy-tree
+---
+mindmap
+[svt_aom_rate_control_kernel]
+    CQP/CRF
+        QP2index TPL Qindex modulation
+            CRF Qindex modulation(r0 based Qindex modulation)
+            CQP Qindex modulation
+            segment level qindex init: svt_aom_setup_segmentation
+                aq==1 or roi_map 启用时才有实际作用
+            sb level qindex modulation
+                aq-mode==2&& tpl: svt_aom_sb_qp_derivation_tpl_la基于tpl r0算法得到每个sb的beta值
+                aq-mode >0 : cyclic_sbb_qp_derivation
+                sb_qindex = frame.base_q_idx
+    CBR/VBR
+        Update PictureQP: rc_pick_q_and_bounds
+            tid==0: svt_av1_get_q_index_from_qstep_ratio
+        set initial SB base_q_idx values
+
+```
+-----------------------------------------------
+
+```mermaid
+---
+title:VBR flowchart
+look:handDrawn
+theme:neutral
+---
+flowchart TB
+    Start((rate_control_kernel))
+    something[...]
+    PicQP[set up picture QP]
+    SbInit{set initial SB base_q_idx values}
+    Variance{enable_variance_boost?}
+    VarianceYes{svt_variance_adjust_qp}
+    QPM{enable_adaptive_quantization==2 && tpl_ctrls.enable?}
+    Start--> something --> PicQP --> SbInit --> Variance{enable_variance_boost?}
+    Variance-->|Yes| VarianceYes -->QPM
+    Variance-->|No| QPM
+    
+```
+-----------------------------------------------
+
+#### seg_id 计算查找与更新
+```mermaid
+---
+config:
+  layout: tidy-tree
+---
+mindmap
+((segment OP))
+    roi_map_setup_segmentation
+    find_segment_qps
+    calculate_segmentation_data
+```
 
 # ROI MAP
-
 
 parse_rio_map_file: 读取roi_map_file并提取信息至app_cfg->roi_map
 retrieve_roi_map_event: app_cfg->roi_map移交给app_cfg->input_buffer_pool, 以节点的形式留存
