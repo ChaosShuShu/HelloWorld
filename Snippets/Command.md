@@ -118,3 +118,5 @@ valgrind --tool=callgrind --callgrind-out-file=callgrind.out
 ./configure --prefix=/home/chaos/ccProj/ffmpeg_build --pkgconfigdir=/home/chaos/ccProj/ffmpeg_build/install/lib/pkgconfig --extra-cflags=-I/home/chaos/ccProj/ffmpeg_build/install/include --extra-ldflags="-L/home/chaos/ccProj/ffmpeg_build/install/lib -Wl,-rpath,/home/chaos/ccProj/ffmpeg_build/install/lib " --extra-libs='-lpthread -lm' --enable-shared --disable-static --enable-gpl --enable-libx265
 ```
 
+# pkg-config 搜索正在使用包的.pc文件
+```pkg-config --debug SvtAv1Enc 2>&1 | grep "SvtAv1Enc"```
