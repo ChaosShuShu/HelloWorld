@@ -30,6 +30,24 @@
 
     收敛点数量（1=首次收敛即退出，1=第二次收敛即退出, 0=关闭）; 在 search_filter_level() 函数内部的迭代或步进搜索过程中，若检测到“失真-滤波强度”曲线已趋于收敛（即继续增加滤波强度带来的收益极小），则提前退出搜索
 
+deltaLF + loop_filter_level -> baseFilterLevel -> lvlSeg -> lvl -> 
+```mermaid
+graph LR
+    A[deltaLF + loop_filter_level] --> B[baseFilterLevel] --> C[lvlSeg] --> D[lvl]
+    D[lvl] --> E1["*limit*:*lvl*>>shift"]
+    D[lvl] --> E2["*blimit*:2*(*lvl*+2)+*limit*"]
+    D[lvl] --> E3[*thresh*:*lvl*>>4]
+    
+    F1[hevMask:HighEdgeVariance]
+    
+    F11["hevMask.threshBd: *thresh*<<(Bitdepth-8)"]
+    F12["filterMask.limitBd: *limit*<<(Bitdepth-8)"]
+    F13["filterMask.blimitBd: *blimit*<<(Bitdepth-8)"]
+    E1 -.->F11
+    E2 -.->F12
+    E3 -.->F13
+```
+
 ### CDEF Constrained Directional Enhanced Filter
 fast-decode 越大，使用高cdef_recon_level的preset门槛越低,cdef控制中的zero_fs_cost_bias和zero_filter_strength_lvl就越高
 
