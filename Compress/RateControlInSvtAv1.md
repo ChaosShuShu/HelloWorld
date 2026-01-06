@@ -61,6 +61,17 @@ pass 2的码率控制包含如下步骤:
 
     在此模式下, 误差被前一pass的实际比特数代替. ```kf_group_bits = bits_left * (kf_group_rate_in_ref / rate_in_ref_left)```, 其中, kf_group_rate_in_ref是前一CRF pass中该GOP的实际比特数之和, ```rate_in_ref_left```是剩余帧的实际比特数之和.
 
+    IDR帧计算下一个GOP的码率分配：
+
+    ```mermaid
+    flowchart TB
+    SET[set_kf_interval_variables]
+    GET[**get_kf_group_bits**]
+    MINUs[MINUS SCORES of IDR]
+
+    SET-->GET-->MINUs
+    ```
+
  ### mini-GOP级比特分配(calculate_total_GF_group_bits())
 
  Mini-GOP级的码率分配与GOP级相似.基于VBR模式, 有如下几种情景:
@@ -72,6 +83,42 @@ pass 2的码率控制包含如下步骤:
 
     此情形下, 误差备用前一pass的实际比特数代替.```GF_group_bits = kf_bits_left * (GF_group_rate_in_ref / rate_in_ref_kf_left)```, GF_group_bits是前一CRFpass对应gf_group或Mini-GOP中对应帧的实际比特数总和. rate_in_ref_kf_left是GOP中剩余Mini-GoP中的帧的的实际比特数之和.
 
+    ```mermaid
+    flowchart TB
+    CALCSTS[calculate_gf_stats]
+    CALCTTGFBITS[**calculate_total_gf_group_bits**
+    分配gf_group码率]
+    CALCMAXQ[**calculate_active_worst_quality**
+    搜索满足gf_group码率的最大GF平均qindex]
+
+
+    CALCSTS-->CALCTTGFBITS-->CALCMAXQ
+    ```
+#### find_qindex_by_rate_with_correction
+- calc_correction_factor: 
+    $$
+    \begin{aligned}
+    Correction_{factor} &= (Err_{mb}/96)^{f(q)},\\
+    q(x)    &=  {0.65,0.70,0.75,0.80,0.85,0.90,0.95,0.95,0.95},\\
+    f(q)    &=  q(q_i)+\frac{(q(q_{i+1})-q(q_i))*(q_i \bmod 32)}{32}
+    \end{aligned}
+    $$
+
+    其中,$Err_{factor}$为每个MB的偏差，96未知;$q(x)$为采样函数，每32个q(实际是qindex)对应一个幂指数；f(q)为插值，会将qindex在其q区间内插值，从而得到一个更平滑的幂指数。
+
+    1. 误差敏感性调节：可变幂指数，不同复杂度内容采用不同校正强度
+    2. 量化参数适应：低码率下使用小的幂指数， 高码率下使用大的幂指数
+    3. 动态范围控制：通过clamp限制极端值影响
+- qbpm_enumerator:
+    $$qbpm_{enum} = 12500000 + 
+    \begin{cases}
+    300000*0,& ER_{total} <= 25\\
+    300000*\frac{ER_{total}-25}{75},& 25 < ER_{total} <= 75\\
+    300000*1,& 50 < ER_{err} > 75\\
+    \end{cases} $$
+- 使用二分法，找到能满足bpm达到理想bpm的最大qindex：$bpm' = qbpm_{enum} * Err_{factor} *rc_{factor} $
+
+
 ### Frame级比特分配
 
 计算完每个GOP和mini-GOP的码率后, 码控算法将计算每帧的基础码率. mini-GOP中所有帧的码率数据存储在GF_group->bit_allocation[]中, 之后会复制到PCS结构体中的base_frame_target中.
@@ -82,7 +129,17 @@ pass 2的码率控制包含如下步骤:
 - 2pass VBR
     此情形下,使用之前pass的实际码率数据来计算每帧的码率预算. ```bit_allocattion = GF_group_bits * total_num_bits / gf_stats.GF_group_rate```, total_num_bits(stat_struct.total_num_bits)是当前帧在之前pass中的实际比特数, GF_group_rate(gf_stats.GF_group_rate)是前一pass中分配当前帧所属mini-GOP或GF group的总比特数.
 
-    在使用look ahead或之前pass的数据计算完每帧的基础目标比特数后(base_frame_target), 码控会基于从packetization受到的反馈来更新目标预算.```thist_frame_target = base_frame_target + (vbr_bits_off_target >= 0)?max_delta:-max_delta```, 其中this_frame_target 是更新后的目标比特数, vbr_bits_off_target计算如下:```vbr_bits_off_target += base_frame_target - actual_frame_size```, vbr_bits_off_target > 0意味着有额外的码率预算可用, vbr_bits_off_target < 0意味着使用的码率资源超标了.max_delta基于vbr_bits_off_target和剩余帧数量得来(例如max_delta = vbr_bits_off_target / number_of_remaining_frames).
+    在使用look ahead或之前pass的数据计算完每帧的基础目标比特数后(base_frame_target), 码控会基于从packetization受到的反馈来更新目标预算[*av1_set_target_rate*].```thist_frame_target = base_frame_target + (vbr_bits_off_target >= 0)?max_delta:-max_delta```, 其中this_frame_target 是更新后的目标比特数, vbr_bits_off_target计算如下:```vbr_bits_off_target += base_frame_target - actual_frame_size```, vbr_bits_off_target > 0意味着有额外的码率预算可用, vbr_bits_off_target < 0意味着使用的码率资源超标了.max_delta基于vbr_bits_off_target和剩余帧数量得来(例如max_delta = vbr_bits_off_target / number_of_remaining_frames).
+
+#### rc_pick_q_and_bounds
+
+```mermaid
+flowchart TB
+0(rc_pick_q_and_bounds)
+1.1[更新I帧active_best_quality/active_worst_quality]
+1.2[TODO]
+2[]
+```
 
 ### Frame级QP分配
 
@@ -155,6 +212,7 @@ $$
 ### Re-encoding
 
 重编码机制用于达成理想的码率使其不至于过分地上溢或下溢. Re-encoding决策在模式决策结束时,且一整帧的常规编码结束之后进行. 由于Re-encoding的决策是发生在熵编码之前, 因此帧大小是在模式决策过程中的估计值而非打包阶段(Packetization)得到的实际帧大小. 比较预测码率与实际码率, 若不满足码率限制, 算法将会决定以新的qindex进行Re-encode. 一般来说,尽管SVT-AV1的设计非常灵活, 但Re-encoding仍将非常耗费资源,因此只有模式决策工序会再次执行, 其他的编码管线如运动估计, 熵编码或者环路滤波等没必要再执行一遍. Re-encode决策的机制如下表:
+
 ```mermaid
 flowchart TB
 MDC(MDC输出的图像)
@@ -172,4 +230,39 @@ judge-->|No|DLF
 ### Post Encode RC Update
 在每帧都在Packetization工序中完全处理完后, 包含处理后帧大小的反馈信息送入码率控制算法中, 并且会更新内部的缓冲区以用于计算未来帧的qindex. 通过这样的机制, 算法将会持续跟踪编码帧目标比特数与实际比特数的的差异(vbr_bits_off_target).```vbr_bits_off_target += base_frame_target - projected_frame_size```, 这里的projected_frame_size即为实际码率. 基于vbr_bits_off_target的符号, 对于后续帧的目标码率将会进行一定幅度的调整以使vbr_bits_off_target维持在可接受的范围中. 所谓可接受的范围指的是以*undershoot_pct*和*overshoot_pct*控制的编码器输入.
 
-*extend_minq* 和 *extend_maxq* 也是用于*active_worst_quality*和*active_worst_quality*修正的两个重要变量, 它的更新是通过比较*rate_error_estimate*, *undershoot_pct*和*overshoot_pct*来确定的:```rate_error_estimate = (vbr_bits_off_target * 100) / total_actual_bits```. 主要想法就是使用打包工序中的反馈薪资, 在best_quality和worst_quality之间更新qindex的范围. 当*rate_error_estimate* > *undershoot_pct* 时,编码器下溢 则active_worst_quality += 1, 否则active_worst_quality -= 1.
+*extend_minq* 和 *extend_maxq* 也是用于*active_worst_quality*和*active_worst_quality*修正的两个重要变量, 它的更新是通过比较*rate_error_estimate*, *undershoot_pct*和*overshoot_pct*来确定的:```rate_error_estimate = (vbr_bits_off_target * 100) / total_actual_bits```. 主要想法就是使用打包工序中的反馈信息, 在best_quality和worst_quality之间更新qindex的范围. 当*rate_error_estimate* > *undershoot_pct* 时,编码器下溢 则active_worst_quality += 1, 否则active_worst_quality -= 1.
+
+
+## 其他
+
+### 代码流程
+Tips:
+
+IDR帧进行KF—Group的码率分配
+```mermaid
+flowchart TB
+KER(RC Kernel)
+RSTPR[restore_param]
+RST2PPR[restore_2pass_param]
+PRORCSTS[svt_aom_process_rc_stat]
+
+    pro1PSTS[process_first_pass_stats]
+    proKFRA[kf_group_rate_assignment]
+
+        kfgraSETINT[set_kf_interval_variables]
+        kfgra
+    
+
+KER-->RSTPR-->RST2PPR-->PRORCSTS
+
+pro1PSTS-->proKFRA
+
+```
+
+svt_aom_rate_control_kernel中的for循环， 单线程模式观察，帧以解码顺序送入kernel中， 每帧先进行RC_INPUT模式处理，再进行RC_PACKETIZATION_FEEDBACK_RESULT模式处理；
+
+在av1_gop_bit_alloction_same_pred及之前都是在pcs.picture_number==0及第一帧时进行的处理。
+并且在此_**预测**_了每帧的基础码率预算。
+
+在kf_group和gf_group码率基本分配完后， 设置pcs.ppcs.this_frame_target（会根据之前帧的vbr offset调整码率预算）
+

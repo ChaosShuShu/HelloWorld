@@ -79,9 +79,6 @@ tasks：
     retrieve_roi_map中mount, 此过程应置于接口函数中,svt_av1_enc_init?
     mount过程需要(EbComponentType)enc_handle[src], EbBufferHeaderType *header_ptr[dst]
 
-
-- FILE* roi_map_file 放入接口结构体: EbSvtAv1EncConfiguration
-
 - SvtAv1RoiMap *roi_map 需要从parse_roi_map传递到 app_cfg->input_buffer_pool中
 
 - parse_roi_map可能需要在Lib中实现， 否则无法规范地在Lib内解析处理roi_map_file
