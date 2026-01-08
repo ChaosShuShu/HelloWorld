@@ -2,6 +2,32 @@
 -- Neovim 基础配置（等价于你的 vimrc）
 -- ===================================
 
+-- 0. 插件管理Lazy,nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+-- 如果本地没有lazy.nvim, 从github下载安装
+    vim.fn.system({
+        "git", "clone", 
+        "--filter=blob:none",   --只下载必要文件,加速下载
+        "https://github.com/folke/lazy.nvim.git", "--branch=stable", 
+        lazypath,               -- 安装到此路径
+    } )
+end
+--  将lazy-nvim的安装路径添加到nvim的runtimepath(rtp)最前
+--  runtimepath是nvim查找插件,脚本,配置的路径列表
+vim.opt.rtp:prepend(lazypath)
+
+require("lazy").setup({
+-- 调用lazy-nvim的setup函数,传入插件列表
+-- lazy..nvim会自动下载,管理,加载以下插件
+
+-- 0.0 基础美化
+    {"nvim-lualine/lualine.nvim"},              -- 安装lualine:美观的状态栏插件(底部显示文件名/模式/git分支等信息)
+-- 0.1 LSP配置(激活语言服务器)a
+    {"neovim/nvim-lspconfig"},
+        {"hrsh7th/nvim-cmp", dependencies = {"hrsh7th/cmp-nvim-lsp", "hr7th/cmp-buffer"}},
+})
+
 -- 1. 启用文件类型检测、插件和自动缩进
 vim.o.filetype = "on"              -- 检测文件类型
 vim.cmd([[filetype plugin indent on]])  -- 启用 filetype plugin 和 indent
@@ -68,4 +94,38 @@ vim.o.smarttab = true      -- 行首 Tab 使用 shiftwidth 宽度
 vim.api.nvim_set_hl(0, "CursorLine", { underline = true })  -- 只显示下划线，不加背景
 -- 或者加浅色背景（取消注释下面这行）：
 -- vim.api.nvim_set_hl(0, "CursorLine", { bg = "#2a2a3a" })
+
+-- 设置主题
+vim.cmd[[colorscheme lunaperche]]
+vim.api.nvim_set_hl(0, 'Comment', { fg = '#6a9955', italic = true})
+
+-- ===================================
+-- 状态栏Lualine配置
+-- ===================================
+require('lualine').setup {
+    options = {
+        icons_enabled = true,   -- 使用图标
+        theme = 'auto',         -- 自动根据colorscheme
+        component_separators =  { left = '|', right = '|' },
+        section_separators = { left = '-', right = '-' },
+        disabled_filetypes = {},
+        always_divide_middle = true,
+    },
+    sections = {
+        lualine_a = {'mode'},
+        lualine_b = {'branch', 'diff', 'diagnostics'},
+        lualine_c = {'filename'},
+        lualine_x = {'encoding', 'fileformat', 'filetype'},
+        lualine_y = {'progress'},
+        lualine_z = {'location'}
+    },
+    inactive_sections = {
+        lualine_c = {'filename'},
+        lualine_x = {'location'}
+    },
+}
+
+
+
+
 
