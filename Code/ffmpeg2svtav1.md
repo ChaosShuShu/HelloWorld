@@ -1,4 +1,23 @@
 
+# svt-av1 基于segment的roi调整qindex原理
+
+## 总述
+基于Segment的QP调整有三个步骤
+1. setup segment    设置segment
+2. find block's segment_id  设置块的segment_id
+3. adjust qp        调节qindex
+
+### setup segment
+mg_parse_roi_file/parse_roi_file
+mg_segment_salicency_image
+mg_roi_map_setup_segmentation/roi_map_setup_segmentation
+
+### find block's segment_id
+mg_roi_map_apply_segmentation_based_quantization/roi_map_apply_segmentation_based_quantization
+
+### adjust qp
+在量化/反量化阶段, 会传入base_qindex及segment_qindex, 量化时使用的qindex=base_qindex + segment_qindex(offset)
+
 # 分析
 目前使用svt-av1中原有的roi-map-file机制处理MG私有的roi文件
 
@@ -119,11 +138,7 @@ LIB1[set_param_based_on_input]-->fun1[derive_roi_map]-->
 fun2[mg_parse_roi_file
     parse_roi_file] --> struct1[scs.roi_map]-->API[EbBufferHeaderType]
 
-
-
 ```
-
-
 
 
 

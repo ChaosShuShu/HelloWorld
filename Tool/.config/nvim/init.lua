@@ -26,6 +26,38 @@ require("lazy").setup({
 -- 0.1 LSP配置(激活语言服务器)a
     {"neovim/nvim-lspconfig"},
         {"hrsh7th/nvim-cmp", dependencies = {"hrsh7th/cmp-nvim-lsp", "hr7th/cmp-buffer"}},
+    {
+        "nvim-treesitter/nvim-treesitter",
+        version =   false,                          -- 使用最新版commit而非release
+        build   =   ":TSUpdate",                    --每次更新插件后自动更新parser
+        lazy    =   false,                          -- 强制不延迟载入
+        dependencies    =   {},                     -- 其他依赖扩展
+        config  =   function()
+            require("nvim-treesitter.config").setup({
+                -- 安装以下语言的parser
+                ensure_installed    =   {
+                    "c", "cpp", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "base", "python",
+                },
+
+                -- 核心功能
+                highlight   =   {enable = true},
+                indent      =   {enable = true},
+            })
+        end,
+    },
+    {
+        "nvim-treesitter/nvim-treesitter-context",
+        event   =   "VeryLazy",                 -- 延迟载入
+        dependencies    =   {"nvim-treesitter/nvim-treesitter"},
+        opts            =   {
+            enable      =   true,   
+            max_lines   =   7,  -- 最多显示3行上下文
+            min_window_height   =   20,
+            multiline_threshold =   20,
+            mode        =   "cursor",   -- 跟随光标位置
+            -- separator    =   "-",
+        },
+    },
 })
 
 -- 1. 启用文件类型检测、插件和自动缩进
