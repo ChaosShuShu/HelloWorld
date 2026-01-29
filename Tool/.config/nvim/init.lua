@@ -3,12 +3,13 @@
 -- ===================================
 
 require("configs.default")
+require("configs.keymap")
 require("configs.ui")
 require("configs.plugin")
-require("configs.keymap")
 require("plugins.cmp")
 require("plugins.lsp")
 require("plugins.lualine")
 require("plugins.treesitter")
 require("plugins.mason")
+require("plugins.telescope")
 

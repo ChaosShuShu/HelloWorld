@@ -17,14 +17,27 @@ require("lazy").setup({
 -- 调用lazy-nvim的setup函数,传入插件列表
 -- lazy..nvim会自动下载,管理,加载以下插件
 
--- 0.0 基础美化
+--  基础美化
     {"nvim-lualine/lualine.nvim"},              -- 安装lualine:美观的状态栏插件(底部显示文件名/模式/git分支等信息)
--- 0.0.1 Mason, 外挂包管理器
+    {"Bekaboo/dropbar.nvim"},              -- 顶部bar, 显示当前文件路径及outline
+-- 0.0.1 Mason, 外挂包-管理器
     {"williamboman/mason.nvim"},
     {"williamboman/mason-lspconfig.nvim"},
 -- 0.1 LSP配置(激活语言服务器)a
     {"neovim/nvim-lspconfig"},
-    {"hrsh7th/nvim-cmp", dependencies = {"hrsh7th/cmp-nvim-lsp", "hr7th/cmp-buffer"}},
+    {"hrsh7th/nvim-cmp", dependencies = {"hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer"}},
+    -- quickfix增强插件, 优化quickfix使用体验
+    {
+        "kevinhwang91/nvim-bqf",
+        ft      =   "qf",   --  只在quickfix filetype(buffer) 加载
+        opts    =   {
+            preview     =   {
+                auto_preview    =   true,   --  上下移动时自动预览
+                delay           =   100,    -- 预览延迟, 避免频繁刷新
+            },
+            auto_resize_height     =   true,
+        },
+    },
     {
         "nvim-treesitter/nvim-treesitter",
         version =   false,                          -- 使用最新版commit而非release
@@ -55,6 +68,12 @@ require("lazy").setup({
             multiline_threshold =   20,
             mode        =   "cursor",   -- 跟随光标位置
             -- separator    =   "-",
+        },
+    },
+    {
+        "nvim-telescope/telescope.nvim",
+        dependencies = {
+            "nvim-lua/plenary.nvim",
         },
     },
 })
