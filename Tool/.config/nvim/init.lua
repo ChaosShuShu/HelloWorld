@@ -12,4 +12,5 @@ require("plugins.lualine")
 require("plugins.treesitter")
 require("plugins.mason")
 require("plugins.telescope")
+require("plugins.lspsaga")
 

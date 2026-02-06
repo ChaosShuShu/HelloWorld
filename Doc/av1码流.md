@@ -59,3 +59,58 @@ ffmpeg -i /media/microsoft1/seq/HDR/芒果实验室_HDR10_1080P25FPS.mp4 -c:v li
 其中
 - _METADATA_TYPE_HDR_VIVID_ 为6-31的值，可自定义, 暂定为10;
 - _metadata_hdr_vivid()_ 为HDR Vivid元数据结构, 参考联盟定义
+
+
+#### metadata_hdr_vivid()(GB)
+![GYT 358-2022 《高动态范围电视系统显示适配元数据技术要求》.pdf](images/hdr-vivid-metadata.png)
+
+| 动态元数据定义 | 描述符 |
+|----------------|--------|
+| hdr_dynamic_metadata() { |  |
+|  __system_start_code__ | u(8) |
+| if(system_start_code==0x01) { |  |
+| num_windows=1 |  |
+| for(w = 0; w < num_windows; w++) { |  |                                                                                           
+| __minimum_maxrgb_pq[w]__ | u(12) |
+| __average_maxrgb_pq[w]__ | u(12) |
+| __variance_maxrgb_pq[w]__ | u(12) |
+| __maximum_maxrgb_pq[w]__ | u(12) |
+| } |  |
+| for(w = 0; w < num_windows; w++) { |  |
+| tone_mapping_enable_mode_flag[w] | u(1) |
+| if(tone_mapping_enable_mode_flag[w]==1) { |  |
+| tone_mapping_param_enable_num[w] | u(1) |
+| tone_mapping_param_num[w]++ |  |
+| for(i=0; i< tone_mapping_param_num[w]; i++) { |  |
+| targeted_system_display_maximum_luminance_pq[i][w] | u(12) |
+| base_enable_flag[i][w] | u(1) |
+| if(base_enable_flag[i][w]) { |  |
+| base_param_m_p[i][w] | u(14) |
+| base_param_m_n[i][w] | u(6) |
+| base_param_m_a[i][w] | u(10) |
+| base_param_m_b[i][w] | u(10) |
+| base_param_m_n[i][w] | u(6) |
+| base_param_K1[i][w] | u(2) |
+| base_param_K2[i][w] | u(2) |
+| base_param_K3[i][w] | u(4) |
+| base_param_Delta_enable_mode[i][w] | u(3) |
+| base_param_enable_Delta[i][w] | u(7) |
+| } |  |
+| 3Spline_enable_flag[i][w] | u(1) |
+| if(3Spline_enable_flag[i][w]) { |  |
+| 3Spline_enable_num[i][w] | u(1) |
+| 3Spline_num++; |  |
+| for(j = 0; j < 3Spline_num; j++) { |  |
+| 3Spline_TH_enable_mode[j][i][w] | u(2) |
+| if((3Spline_TH_mode[j][i][w]==0) || (3Spline_TH_mode[j][i][w]==2)) { |  |
+| 3Spline_TH_enable_MB[j][i][w] | f(8) |
+| } |  |
+| 3Spline_TH_enable[j][i][w] | f(12) |
+| 3Spline_TH_enable_Delta1[j][i][w] | f(10) |
+| 3Spline_TI_enable_Delta2[j][i][w] | f(10) |
+| 3Spline_enable_Strength[j][i][w] | f(8) |
+| } |  |
+| } |  |
+| } |  |
+| color_saturation_mapping_flag[w] | u(1) |
+

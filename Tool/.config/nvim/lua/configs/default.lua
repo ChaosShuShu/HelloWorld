@@ -41,7 +41,7 @@ vim.o.writebackup = false
 vim.o.swapfile = false
 
 -- 更好的滚动体验
-vim.o.scrolloff = 40        -- 光标上下保留至少 5 行
+vim.o.scrolloff = 5        -- 光标上下保留至少 5 行
 
 -- 让 Backspace 和 Tab 行为模拟真实 Tab（一次性处理 4 个空格）
 vim.o.tabstop = 4          -- Tab 显示宽度为 4

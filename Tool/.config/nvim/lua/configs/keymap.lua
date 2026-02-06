@@ -38,5 +38,7 @@ vim.api.nvim_create_autocmd("LspAttach", {  -- event:LspAttach 触发时自动�
         vim.keymap.set("n", "gi", vim.lsp.buf.implementation,               { buffer = ev.buf, noremap = true, silent = true, desc = "[LSP]: Go to implemtntation"})
         vim.keymap.set("n", "gr", vim.lsp.buf.references,               { buffer = ev.buf, noremap = true, silent = true, desc = "[LSP]: Go to reference"})
         vim.keymap.set('n', 'gk', vim.lsp.buf.hover,                    { buffer = ev.buf, noremap = true, silent = true, desc = '[LSP]: hover'})
+        vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action,                    { buffer = ev.buf, noremap = true, silent = true, desc = '[LSP]: Code Action'})
+        vim.keymap.set('n', '<leader>rn', "<cmd>Lspsaga rename<CR>",                    { buffer = ev.buf, noremap = true, silent = true, desc = '[LSPsaga]: Rename symbol(with preview)'})
     end,
 })

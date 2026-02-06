@@ -20,6 +20,31 @@ require("lazy").setup({
 --  基础美化
     {"nvim-lualine/lualine.nvim"},              -- 安装lualine:美观的状态栏插件(底部显示文件名/模式/git分支等信息)
     {"Bekaboo/dropbar.nvim"},              -- 顶部bar, 显示当前文件路径及outline
+    {
+        "nvimdev/lspsaga.nvim",             --  LSP 的 UI美化+增强插件
+        dependencies    =   {
+            "nvim-treesitter/nvim-treesitter",
+            "nvim-tree/nvim-web-devicons",      --  图标库插件
+        },
+        config  =   function()
+            require("lspsaga").setup{}      -- 默认配置
+        end,
+    },              -- 顶部bar, 显示当前文件路径及outline
+    {
+        "romgrk/barbar.nvim",
+        dependencies    =   { "nvim-tree/nvim-web-devicons", },
+        init            =   function()
+            vim.g.barbar_auto_setup =   false
+        end,
+        icons           =   {
+            filetype    =   { enable =  true },
+            modified    =   { button = 'ο' },
+        },
+--         opts    =   {
+--             animation   =   true,
+--             sidebar_filetypes   =   { NvimTree  =   true, },
+--         },
+    },
 -- 0.0.1 Mason, 外挂包-管理器
     {"williamboman/mason.nvim"},
     {"williamboman/mason-lspconfig.nvim"},
@@ -40,22 +65,7 @@ require("lazy").setup({
     },
     {
         "nvim-treesitter/nvim-treesitter",
-        version =   false,                          -- 使用最新版commit而非release
         build   =   ":TSUpdate",                    -- 每次更新插件后自动更新parser
-        lazy    =   false,                          -- 强制不延迟载入
-        dependencies    =   {},                     -- 其他依赖扩展
-        config  =   function()
-            require("nvim-treesitter.config").setup({
-                -- 安装以下语言的parser
-                ensure_installed    =   {
-                    "c", "cpp", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "base", "python",
-                },
-
-                -- 核心功能
-                highlight   =   {enable = true},
-                indent      =   {enable = true},
-            })
-        end,
     },
     {
         "nvim-treesitter/nvim-treesitter-context",
@@ -76,6 +86,19 @@ require("lazy").setup({
             "nvim-lua/plenary.nvim",
         },
     },
+-- 2.0 语言相关优化
+    {
+        "MeanderingProgrammer/render-markdown.nvim",
+        dependencies    =   {"nvim-treesitter/nvim-treesitter"},
+        ft              =   {"markdown"},
+    },
+--  3.0 功能扩展
+    {
+        "stevearc/oil.nvim",
+        dependencies    =   { "nvim-tree/nvim-web-devicons" },
+        ops             =   {},
+    },
+
 })
 
 -- c. 相关快捷键
